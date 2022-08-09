@@ -33,7 +33,7 @@ public final class brotatoFruitStallThiever extends AbstractScript implements Ch
     String stateForDebugging;
     long startTime;
     int oldThievExp;
-    int fruitStolen = 0;
+    int fruitStolen;
     //start at 25, afk every 25-50
     int actionsTillAfk = 25;
     int closedDialogues;
@@ -59,36 +59,25 @@ public final class brotatoFruitStallThiever extends AbstractScript implements Ch
 
             case THIEVING:
                 stateForDebugging = "THIEVING";
-
                 GameObject stall = GameObjects.closest("Fruit stall");
+                handleDialogues();
+                if (stall == null) {
+                    s = "Waiting for stall";
+                    sleep(1000);
+                }
                 if (actionsTillAfk <= 1) {
                     log("here actions <1");
                     sleep(customSleepFunction());
                 }
-                if (Dialogues.inDialogue()) {
-                    log("Dialogues inDialogue check hit");
-                    if (randomNum(1, 10) % 2 == 0) {
-                        Dialogues.spaceToContinue();
-                    } else {
-                        Dialogues.clickContinue();
-                    }
-                    closedDialogues++;
-                }
-                stall.interact("Steal-from");
                 s = "All is good, thieving away";
+                stall.interact("Steal-from");
+                sleep(randomNum(300,700));
 
-                sleep(1000);
-                if (stall == null) {
-                    s = "Waiting for stall";
-                    sleep(1000);
-
-
-                }
 
                 break;
             case DROP:
                 stateForDebugging = "DROP";
-                s = "Inventory full - dropping all cups of tea";
+                s = "Inventory full - dropping all fruit except strange fruit";
                 Inventory.dropAll(i -> i != null && !i.getName().contains("Coins"));
                 break;
             case OUTOFPOSITION:
@@ -164,7 +153,7 @@ public final class brotatoFruitStallThiever extends AbstractScript implements Ch
         log("Runtime: " + getElapsedTimeAsString());
     }
 
-    /*
+
     private void handleDialogues() {
         if (Dialogues.inDialogue()) { // see https://dreambot.org/javadocs/org/dreambot/api/methods/dialogues/Dialogues.html
             for (int i = 0; i<4; i++) {
@@ -179,7 +168,7 @@ public final class brotatoFruitStallThiever extends AbstractScript implements Ch
         }
     }
 
-     */
+
     private String makeTimeString(long ms) {
         final int seconds = (int) (ms / 1000) % 60;
         final int minutes = (int) ((ms / (1000 * 60)) % 60);
